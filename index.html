@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CartoonCV Pro - Advanced Image Processing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #00ffcc;
+            --accent-blue: #00ccff;
+            --dark: #1a1a2e;
+            --light: #ffffff;
+            --text: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--light);
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            text-align: center;
+            padding: 40px 20px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .header-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== LEFT PANEL - CONTROLS ===== */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(0, 255, 204, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(0, 255, 204, 0.15);
+            transform: scale(1.02);
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .file-name {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        /* ===== FILTERS ===== */
+        .filters-section {
+            margin-top: 25px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            color: var(--light);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent);
+            background: rgba(0, 255, 204, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            border-color: var(--accent);
+            background: rgba(0, 255, 204, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+
+        .filter-icon {
+            font-size: 18px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-blue) 100%);
+            color: #000;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 204, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: rgba(0, 255, 204, 0.1);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== LOADER ===== */
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* ===== STATUS MESSAGES ===== */
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.error {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .message.success {
+            background: rgba(0, 255, 204, 0.2);
+            color: var(--accent);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+        }
+
+        .message.info {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        /* ===== RIGHT PANEL - PREVIEW ===== */
+        .preview-panel {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .canvas-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .canvas-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .canvas-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .canvas-action-btn {
+            padding: 6px 12px;
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            border-radius: 6px;
+            color: var(--accent);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .canvas-action-btn:hover {
+            background: rgba(0, 255, 204, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+        }
+
+        canvas {
+            width: 100%;
+            border-radius: 12px;
+            display: block;
+            background: rgba(0, 0, 0, 0.2);
+            min-height: 200px;
+        }
+
+        /* ===== IMAGE COMPARISON SLIDER ===== */
+        .comparison-slider {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .comparison-slider canvas {
+            display: block;
+            width: 100%;
+        }
+
+        .slider-handle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+            cursor: ew-resize;
+            transform: translateX(-50%);
+        }
+
+        .slider-label {
+            position: absolute;
+            top: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--light);
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .slider-label.original {
+            left: 10px;
+        }
+
+        .slider-label.result {
+            right: 10px;
+        }
+
+        /* ===== STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 28px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .control-panel {
+                position: relative;
+                top: auto;
+            }
+
+            .filters-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-title">🎨 CartoonCV Pro</div>
+    <div class="header-subtitle">Advanced AI-Powered Image Transformation</div>
+</header>
+
+<div class="container">
+    <div class="main-grid">
+        <!-- LEFT PANEL -->
+        <div class="control-panel">
+            <!-- UPLOAD SECTION -->
+            <div>
+                <div class="section-title">📤 Upload</div>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Click or drag image here</div>
+                    <div class="file-name" id="fileName"></div>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+            </div>
+
+            <!-- FILTERS SECTION -->
+            <div class="filters-section">
+                <div class="section-title">🎯 Effects</div>
+                <div class="filters-grid" id="filtersGrid">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="button-group">
+                <button class="btn-primary" onclick="processImage()" id="processBtn">
+                    ✨ Process
+                </button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-secondary" onclick="resetApp()">Reset</button>
+                <button class="btn-secondary" onclick="downloadImage()" id="downloadBtn">Download</button>
+            </div>
+
+            <!-- LOADER -->
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+                <p>Processing image...</p>
+            </div>
+
+            <!-- MESSAGES -->
+            <div class="message error" id="errorMsg"></div>
+            <div class="message success" id="successMsg"></div>
+            <div class="message info" id="infoMsg"></div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="preview-panel">
+            <!-- ORIGINAL IMAGE -->
+            <div class="canvas-container">
+                <div class="canvas-header">
+                    <div class="canvas-title">Original Image</div>
+                </div>
+                <canvas id="origCanvas"></canvas>
+            </div>
+
+            <!-- PROCESSED IMAGE -->
+            <div class="canvas-container">
+                <div class="canvas-header">
+                    <div class="canvas-title">Processed Image</div>
+                    <div class="canvas-actions">
+                        <button class="canvas-action-btn" onclick="copyToClipboard('cartoonCanvas')">📋 Copy</button>
+                    </div>
+                </div>
+                <canvas id="cartoonCanvas"></canvas>
+            </div>
+
+            <!-- COMPARISON SLIDER -->
+            <div class="canvas-container" id="comparisonSection" style="display: none;">
+                <div class="canvas-header">
+                    <div class="canvas-title">Side-by-Side Comparison</div>
+                </div>
+                <div class="comparison-slider" id="comparisonSlider">
+                    <canvas id="comparisonCanvas"></canvas>
+                    <div class="slider-handle" id="sliderHandle"></div>
+                    <div class="slider-label original">Original</div>
+                    <div class="slider-label result">Processed</div>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-grid" id="statsGrid" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-value" id="imageStat">-</div>
+                    <div class="stat-label">Dimensions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="filterStat">-</div>
+                    <div class="stat-label">Filter Used</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let originalImage = null;
+let processedImage = null;
+let selectedFilter = 'standard';
+let canvasWidth = 0;
+let canvasHeight = 0;
+
+// Load filters on page load
+document.addEventListener('DOMContentLoaded', loadFilters);
+
+// Load available filters
+async function loadFilters() {
+    try {
+        const response = await fetch('/api/filters');
+        const filters = await response.json();
+        const filtersGrid = document.getElementById('filtersGrid');
+        filtersGrid.innerHTML = '';
+
+        for (const [key, data] of Object.entries(filters)) {
+            const btn = document.createElement('button');
+            btn.className = `filter-btn ${key === 'standard' ? 'active' : ''}`;
+            btn.innerHTML = `
+                <span class="filter-icon">${data.icon}</span>
+                <span style="font-size: 11px;">${data.name.split(' ')[0]}</span>
+            `;
+            btn.title = data.description;
+            btn.onclick = () => selectFilter(key, btn);
+            filtersGrid.appendChild(btn);
+        }
+    } catch (err) {
+        showError('Failed to load filters');
+    }
+}
+
+function selectFilter(filter, element) {
+    selectedFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+}
+
+// Upload area drag and drop
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+
+uploadArea.addEventListener('click', () => fileInput.click());
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        handleFileSelect();
+    }
+});
+
+fileInput.addEventListener('change', handleFileSelect);
+
+function handleFileSelect() {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    document.getElementById('fileName').textContent = `✓ ${file.name}`;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            canvasWidth = img.width;
+            canvasHeight = img.height;
+            originalImage = img;
+            drawCanvas('origCanvas', img);
+            updateStats();
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function drawCanvas(canvasId, image) {
+    const canvas = document.getElementById(canvasId);
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+}
+
+async function processImage() {
+    const file = fileInput.files[0];
+    if (!file) {
+        showError('Please upload an image first');
+        return;
+    }
+
+    const processBtn = document.getElementById('processBtn');
+    processBtn.disabled = true;
+    document.getElementById('loader').style.display = 'block';
+
+    try {
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('filter', selectedFilter);
+
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+
+        const img = new Image();
+        img.onload = () => {
+            processedImage = img;
+            drawCanvas('cartoonCanvas', img);
+            updateComparisonSlider();
+            document.getElementById('comparisonSection').style.display = 'block';
+            document.getElementById('statsGrid').style.display = 'grid';
+            document.getElementById('filterStat').textContent = selectedFilter.toUpperCase();
+            showSuccess('✅ Image processed successfully!');
+        };
+        img.onerror = () => showError('Failed to load processed image');
+        img.src = data.output_path + '?t=' + Date.now();
+
+    } catch (err) {
+        showError(`Error: ${err.message}`);
+    } finally {
+        processBtn.disabled = false;
+        document.getElementById('loader').style.display = 'none';
+    }
+}
+
+function updateComparisonSlider() {
+    if (!originalImage || !processedImage) return;
+
+    const canvas = document.getElementById('comparisonCanvas');
+    const slider = document.getElementById('comparisonSlider');
+    
+    canvas.width = originalImage.width;
+    canvas.height = originalImage.height;
+    
+    const ctx = canvas.getContext('2d');
+    const handlePos = canvas.width / 2;
+
+    function drawComparison(pos) {
+        ctx.drawImage(originalImage, 0, 0);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(pos, 0, canvas.width - pos, canvas.height);
+        ctx.clip();
+        ctx.drawImage(processedImage, 0, 0);
+        ctx.restore();
+    }
+
+    drawComparison(handlePos);
+
+    let isDragging = false;
+    const handle = document.getElementById('sliderHandle');
+
+    handle.addEventListener('mousedown', () => isDragging = true);
+    document.addEventListener('mouseup', () => isDragging = false);
+
+    slider.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = slider.getBoundingClientRect();
+        const pos = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        handle.style.left = (pos / rect.width * 100) + '%';
+        drawComparison(pos);
+    });
+}
+
+function updateStats() {
+    document.getElementById('imageStat').textContent = `${canvasWidth}×${canvasHeight}`;
+}
+
+function downloadImage() {
+    const canvas = document.getElementById('cartoonCanvas');
+    if (canvas.width === 0) {
+        showError('No processed image to download');
+        return;
+    }
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `CartoonCV_${selectedFilter}_${Date.now()}.png`;
+    link.click();
+    showSuccess('Image downloaded!');
+}
+
+function copyToClipboard(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    canvas.toBlob(blob => {
+        navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+        ]).then(() => {
+            showSuccess('Image copied to clipboard!');
+        }).catch(() => {
+            showError('Failed to copy image');
+        });
+    });
+}
+
+function resetApp() {
+    fileInput.value = '';
+    document.getElementById('fileName').textContent = '';
+    originalImage = null;
+    processedImage = null;
+    document.getElementById('origCanvas').getContext('2d').clearRect(0, 0, document.getElementById('origCanvas').width, document.getElementById('origCanvas').height);
+    document.getElementById('cartoonCanvas').getContext('2d').clearRect(0, 0, document.getElementById('cartoonCanvas').width, document.getElementById('cartoonCanvas').height);
+    document.getElementById('comparisonSection').style.display = 'none';
+    document.getElementById('statsGrid').style.display = 'none';
+    selectedFilter = 'standard';
+    document.querySelectorAll('.filter-btn')[0].click();
+}
+
+function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function showSuccess(msg) {
+    const el = document.getElementById('successMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
+}
+
+function showInfo(msg) {
+    const el = document.getElementById('infoMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
+}
+</script>
+
+</body>
+</html>
